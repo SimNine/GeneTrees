@@ -29,3 +29,13 @@ GeneTrees
 --Leaf nodes generate no fitness unless they collide with a sunspeck, then absorbing its fitness
 --Each node costs 1 fitness per tick
 --Root nodes generate 2 fitness per tick when underground
+
+0.2.0 - 3/23/17
+-Pressing "D" now toggles debug mode
+--Displays fitness level of sunspecks
+--Displays bounding boxes of nodes
+-Eliminated printing to console the time to mutate (it was insignificant)
+-Nodes now cost fitness per tick proportional to their size
+-Root nodes generate fitness proportional to their size
+-SunSpecks are tripled in power so that leaves are competitive
+-Fitness is now represented by a long instead of an int

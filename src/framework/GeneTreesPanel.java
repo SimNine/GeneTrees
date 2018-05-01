@@ -5,6 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -27,9 +29,16 @@ public class GeneTreesPanel extends JPanel {
 	private int treeIndex = 0;
 	private int generation = 0;
 	
+	private boolean ticking = true;
+	
+	public int xMouse = 0;
+	public int yMouse = 0;
+	
 	private Timer time = new Timer(tickSpeed, new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-            tick();
+        	if (ticking) {
+        		tick();
+        	}
             repaint();
         }
 	});
@@ -45,11 +54,7 @@ public class GeneTreesPanel extends JPanel {
 			public void keyPressed(KeyEvent e) {
 				switch (e.getKeyCode()) {
 				case KeyEvent.VK_P:
-					if (time.isRunning()) {
-						time.stop();
-					} else {
-						time.start();
-					}
+					ticking = !ticking;
 					break;
 				case KeyEvent.VK_O:
 					finishGen();
@@ -66,10 +71,21 @@ public class GeneTreesPanel extends JPanel {
 				case KeyEvent.VK_M:
 					finishNumGens(100);
 					break;
+				case KeyEvent.VK_D:
+					GeneTrees.debug = !GeneTrees.debug;
+					break;
 				}
 			}
 			public void keyReleased(KeyEvent e) {}
 			public void keyTyped(KeyEvent e) {}
+		});
+		
+		addMouseMotionListener(new MouseMotionListener() {
+			public void mouseDragged(MouseEvent e) {}
+			public void mouseMoved(MouseEvent e) {
+				xMouse = e.getX();
+				yMouse = e.getY();
+			}
 		});
 	}
 	
@@ -90,7 +106,7 @@ public class GeneTreesPanel extends JPanel {
 		while (generation < currGen + num) {
 			tick();
 		}
-		System.out.println("...done computing " + num + "generations");
+		System.out.println("...done computing " + num + " generations");
 		time.start();
 	}
 	
@@ -98,7 +114,7 @@ public class GeneTreesPanel extends JPanel {
 		long newTime = System.currentTimeMillis();
 		long timeDiff = (newTime - sysTime)/1000;
 		sysTime = newTime;
-		System.out.print("generation " + generation + " finished, simulated in " + timeDiff + " seconds, ");
+		System.out.println("generation " + generation + " finished, simulated in " + timeDiff + " seconds");
 		
 		generation++;
 		
@@ -112,10 +128,11 @@ public class GeneTreesPanel extends JPanel {
 			trees.set(500 + i, new GeneTree(trees.get(i)));
 		}
 		
-		newTime = System.currentTimeMillis();
-		timeDiff = (newTime - sysTime)/1000;
-		sysTime = newTime;
-		System.out.println("children mutated in " + timeDiff + " seconds");
+		// not significant
+//		newTime = System.currentTimeMillis();
+//		timeDiff = (newTime - sysTime)/1000;
+//		sysTime = newTime;
+//		System.out.println("children mutated in " + timeDiff + " seconds");
 		
 		treeIndex = 0;
 	}

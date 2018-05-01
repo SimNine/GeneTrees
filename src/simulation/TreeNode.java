@@ -25,17 +25,17 @@ public class TreeNode {
 	private HashSet<TreeNode> children = new HashSet<TreeNode>();
 	
 	// deeply, recursively clones a TreeNode
-	public TreeNode(TreeNode temp, GeneTree owner) {
-		for (TreeNode n : temp.getChildren()) {
-			children.add(new TreeNode(n, owner));
-		}
-		
-		this.size = temp.getSize();
-		this.type = temp.getType();
-		this.parent = temp.getParent();
+	public TreeNode(TreeNode tgt, TreeNode parent, GeneTree owner) {
+		this.size = tgt.getSize();
+		this.type = tgt.getType();
+		this.parent = parent;
 		this.owner = owner;
-		this.dist = temp.getDist();
-		this.angle = temp.getAngle();
+		this.dist = tgt.getDist();
+		this.angle = tgt.getAngle();
+
+		for (TreeNode n : tgt.getChildren()) {
+			children.add(new TreeNode(n, this, owner));
+		}
 	}
 	
 	// creates a new TreeNode with given owner and parent node
@@ -256,5 +256,9 @@ public class TreeNode {
 	
 	public void addChild() {
 		children.add(new TreeNode(owner, this));
+	}
+	
+	public void setParent(TreeNode p) {
+		this.parent = p;
 	}
 }

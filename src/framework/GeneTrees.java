@@ -21,15 +21,15 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  */
-
 package framework;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 public class GeneTrees implements Runnable {
-	public static final String ver = "0.1.0";
+	public static final String ver = "0.2.0";
 	public static JFrame frame;
 	public static GeneTreesPanel panel;
+	public static boolean debug = false;
 
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new GeneTrees());
