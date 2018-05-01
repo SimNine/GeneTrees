@@ -42,3 +42,8 @@ GeneTrees
 
 0.3.0 - 3/24/17
 -Added load/save (F1 to save, F2 to load)
+
+0.3.1 - 3/24/17
+-Added continuous generation with regular saving
+-Added more instruction strings
+-A few other small bugfixes

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -80,6 +81,9 @@ public class GeneTreesPanel extends JPanel {
 				case KeyEvent.VK_F2:
 					Loader.loadGame();
 					break;
+				case KeyEvent.VK_R:
+					continuousGenAndSave();
+					break;
 				}
 			}
 			public void keyReleased(KeyEvent e) {}
@@ -116,6 +120,25 @@ public class GeneTreesPanel extends JPanel {
 		this.generation = gen;
 		sysTime = System.currentTimeMillis();
 		sun.clear();
+	}
+	
+	private void continuousGenAndSave() {
+		time.stop();
+		
+		int saveDelay = 10; // interval of generations by which to save
+        String fileName = JOptionPane.showInputDialog(this, "name this generation stream", null);
+		
+		System.out.println("computing generations, saving every " + saveDelay + " gens");
+		while (true) {
+			// the first tick of each marked generation, save the generation
+			if (generation % saveDelay == 0 &&
+				treeIndex == 0 &&
+				tickNum == 0) {
+				Loader.saveGame(fileName + "_gen" + generation);
+			}
+			
+			tick(); // ad infinitum
+		}
 	}
 	
 	private void finishNumGens(int num) {
@@ -182,22 +205,21 @@ public class GeneTreesPanel extends JPanel {
 	private void finishInd() {
 		time.stop();
 		
-		while (tickNum < maxTick) {
+		int currTree = treeIndex;
+		while (currTree == treeIndex) {
 			tick();
 		}
-		
-		nextInd();
 		
 		time.start();
 	}
 	
 	private void tick() {
+		tickNum++; // advance the tick number
+		
 		// check for this being the last tick for this individual
 		if (tickNum == maxTick) {
 			nextInd();
 		}
-		
-		tickNum++; // advance the tick number
 		
 		if (Math.random() < 0.10) { // 10% chance of adding a new sunspeck
 			sun.add(new SunSpeck((int)(Math.random()*this.getWidth()), 0));
@@ -245,6 +267,10 @@ public class GeneTreesPanel extends JPanel {
 		g.drawString("Skip ten generations: B", 0, fh*14);
 		g.drawString("Skip fifty generations: N", 0, fh*15);
 		g.drawString("Skip one hundred generations: M", 0, fh*16);
+
+		g.drawString("Save current generation: F1", 0, fh*18);
+		g.drawString("Load a saved generation: F2", 0, fh*19);
+		g.drawString("Run continuously, saving every 10 generations: R", 0, fh*20);
 	}
 	
 	public int getGroundLevel() {

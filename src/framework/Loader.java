@@ -16,13 +16,23 @@ import simulation.TreeNode;
 public class Loader {
 	
 	private static File saveDir = new File("savedgames");
-
+	
 	public static void saveGame() {
 		GeneTrees.panel.stopTime();
 		
         if (!saveDir.exists()) saveDir.mkdir();
         
-        String filename = JOptionPane.showInputDialog(GeneTrees.panel, "Save Level", null) + ".gt";
+        String filename = JOptionPane.showInputDialog(GeneTrees.panel, "Save Level", null);
+        
+        saveGame(filename);
+	}
+
+	public static void saveGame(String saveName) {
+		GeneTrees.panel.stopTime();
+		
+        if (!saveDir.exists()) saveDir.mkdir();
+        
+        String filename = saveName + ".gt";
         if (filename.equals("null.gt")) {
         	GeneTrees.panel.startTime();
         	return;
@@ -104,9 +114,9 @@ public class Loader {
             // done, finish up
             oos.flush();
             oos.close();
-            System.out.print("current gen saved");
+            System.out.println("saved");
         } catch (Exception e) {
-            System.out.println("save failed");
+            System.out.println("failed");
             e.printStackTrace();
             System.exit(1);
         }

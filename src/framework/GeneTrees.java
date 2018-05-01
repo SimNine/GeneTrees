@@ -26,7 +26,7 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 public class GeneTrees implements Runnable {
-	public static final String ver = "0.3.0";
+	public static final String ver = "0.3.1";
 	public static JFrame frame;
 	public static GeneTreesPanel panel;
 	public static boolean debug = false;
