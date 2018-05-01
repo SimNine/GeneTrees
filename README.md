@@ -1,2 +1,8 @@
 # GeneTrees
-No controls and no instructions, because this version doesn't do anything. Enjoy.
+Keybindings:
+P - Pause
+I - Skip an individual
+O - Skip a generation
+B - Skip ten generations
+N - Skip fifty generations
+M - Skip one hundred generations

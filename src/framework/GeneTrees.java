@@ -21,12 +21,15 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  */
- 
+
+package framework;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-public class GeneTrees implements Runnable{
-	private String ver = "0.0.0";
+public class GeneTrees implements Runnable {
+	public static final String ver = "0.1.0";
+	public static JFrame frame;
+	public static GeneTreesPanel panel;
 
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new GeneTrees());
@@ -34,7 +37,7 @@ public class GeneTrees implements Runnable{
 
 	@Override
 	public void run() {
-		JFrame frame = new JFrame("GeneTrees " + ver);
+		frame = new JFrame("GeneTrees " + ver);
 		
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -43,8 +46,9 @@ public class GeneTrees implements Runnable{
 		frame.setUndecorated(false);
 		frame.setVisible(true);
 		
-		GeneTreesPanel panel = new GeneTreesPanel(800, 600);
+		panel = new GeneTreesPanel(800, 600);
 		frame.add(panel);
+		panel.init();
 	}
 	
 }

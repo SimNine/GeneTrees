@@ -4,3 +4,28 @@ GeneTrees
 0.0.0 - Unknown (sometime around 5/xx/2016)
 -Not much to see here
 -Basics of java swing set up
+
+0.1.0 - 3/23/17
+-Redone pretty much everything
+-Environment:
+--TreeNode
+---A node, (potentially) with children
+---One of several different types: leaf, structure, root, watercatcher
+---Contains "genes"
+--GeneTree
+---A wrapper for a tree of TreeNodes
+---Contains cached data to compute evolution faster
+---Contains paint methods and collision checking methods
+--SunSpeck
+---Essentially just a wrapper for a triplet of values
+---xPos, yPos, and "fitness" which is essentially the value of the speck
+---Greater fitness in a speck -> greater fitness when absorbed
+-Controls:
+--Some fairly lame keyboard controls, no real interface yet
+--Keys are mapped to skip various lengths of time (i.e., number of ticks)
+--Rendering is disabled while skipping in order to compute efficiently as possible
+-Fitness calculations:
+--SunSpecks spawn at top of screen with 10,000 fitness, losing 20 fitness each tick as they descend
+--Leaf nodes generate no fitness unless they collide with a sunspeck, then absorbing its fitness
+--Each node costs 1 fitness per tick
+--Root nodes generate 2 fitness per tick when underground
