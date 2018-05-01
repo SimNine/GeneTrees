@@ -69,3 +69,10 @@ GeneTrees
 -Added command line args
 --First argument is the number of threads to use
 --Second argument is time between thread checks, in ms
+
+0.5.1 - 9/16/17
+-Revamped the threading system, now that I understand how threads work
+--The main thread now divides up the remaining unsimulated trees into piles, one pile for each Simulation thread
+--Each thread goes through its pile of trees, then ends
+--The main thread join() each of the Simulation threads (no more busy waiting)
+-Substantial performance improvement

@@ -2,9 +2,15 @@ package simulation;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.ArrayDeque;
 import java.util.HashSet;
+import java.util.List;
+
+import framework.GeneTrees;
 
 public class Simulation extends Thread {
+	private List<GeneTree> unsimulatedTrees;
+	private ArrayDeque<GeneTree> simulatedTrees = new ArrayDeque<GeneTree>();
 	private HashSet<SunSpeck> sun = new HashSet<SunSpeck>();
 	private static int groundLevel = 400;
 	
@@ -13,23 +19,27 @@ public class Simulation extends Thread {
 	private int tickNum = 0;
 	private int maxTick = 10000;
 	
-	private GeneTree tree;
-	private final int treeIndex;
+	private GeneTree currTree;
 	
-	public Simulation(GeneTree t, int index, int width, int height) {
-		this.tree = t;
-		this.treeIndex = index;
+	public Simulation(int width, int height, List<GeneTree> unsimulatedTrees) {
 		this.width = width;
 		this.height = height;
+		this.unsimulatedTrees = unsimulatedTrees;
 	}
 	
 	public void run() {
-		while (!tree.isDone()) {
+		while (!unsimulatedTrees.isEmpty() || currTree != null) {
 			tick();
 		}
+		
+		GeneTrees.panel.addSimulatedTrees(simulatedTrees);
 	}
 	
-	public void tick() {
+	public void tick() {		
+		if (currTree == null) {
+			currTree = unsimulatedTrees.remove(0);
+		}
+		
 		tickNum++; // advance the tick number
 		
 		if (Math.random() < 0.10) { // 10% chance of adding a new sunspeck
@@ -45,11 +55,15 @@ public class Simulation extends Thread {
 		}
 		sun.removeAll(rem); // remove all specks that have hit the ground
 		
-		tree.tick(sun); // tick the tree
+		currTree.tick(sun); // tick the tree
 		
 		// if the tick limit has been reached
 		if (tickNum == maxTick) {
-			tree.setDone(true);
+			currTree.setDone(true);
+			simulatedTrees.add(currTree);	
+			currTree = null;
+			sun.clear();
+			tickNum = 0;
 		}
 	}
 	
@@ -59,7 +73,9 @@ public class Simulation extends Thread {
 		g.setColor(new Color(183, 85, 23));
 		g.fillRect(0, groundLevel, width, height - groundLevel);
 		
-		tree.draw(g);
+		if (currTree != null) {
+			currTree.draw(g);
+		}
 		
 		for (SunSpeck s : sun) {
 			s.draw(g);
@@ -74,19 +90,15 @@ public class Simulation extends Thread {
 		return maxTick;
 	}
 	
-	public boolean isDone() {
-		return tree.isDone();
-	}
-	
 	public static int getGroundLevel() {
 		return groundLevel;
 	}
 	
-	public int getTreeIndex() {
-		return treeIndex;
+	public GeneTree getCurrTree() {
+		return currTree;
 	}
 	
-	public GeneTree getTree() {
-		return tree;
+	public boolean isDone() {
+		return (unsimulatedTrees.isEmpty() && currTree == null);
 	}
 }

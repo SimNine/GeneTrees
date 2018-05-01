@@ -30,7 +30,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 public class GeneTrees implements Runnable {
-	public static final String ver = "0.5.0";
+	public static final String ver = "0.5.1";
 	public static JFrame frame;
 	public static GeneTreesPanel panel;
 	public static boolean debug = false;
@@ -39,7 +39,6 @@ public class GeneTrees implements Runnable {
 	public static int tickSpeed = 2;
 	
 	private static int numThreads;
-	private static int threadCheckDelay;
 	
 	public static Timer time = new Timer(tickSpeed, new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -54,9 +53,8 @@ public class GeneTrees implements Runnable {
 		SwingUtilities.invokeLater(new GeneTrees());
 		
 		numThreads = Integer.parseInt(args[0]);
-		threadCheckDelay = Integer.parseInt(args[1]);
 		
-		System.out.println("starting GeneTrees v" + ver + " with " + numThreads + " threads and " + threadCheckDelay + "ms thread checking delay");
+		System.out.println("starting GeneTrees v" + ver + " with " + numThreads + " threads");
 	}
 
 	@Override
@@ -70,7 +68,7 @@ public class GeneTrees implements Runnable {
 		frame.setUndecorated(false);
 		frame.setVisible(true);
 		
-		panel = new GeneTreesPanel(800, 600, numThreads, threadCheckDelay);
+		panel = new GeneTreesPanel(800, 600, numThreads);
 		frame.add(panel);
 		panel.init();
 		time.start();
