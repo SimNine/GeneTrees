@@ -23,6 +23,10 @@ public class GeneTreesPanel extends JPanel {
 	private int generation = 0;
 	private final int genSize = 10000;
 	
+	private long avgFitness = 0;
+	private long minFitness = Long.MAX_VALUE;
+	private long maxFitness = Long.MIN_VALUE;
+	
 	public int xMouse = 0;
 	public int yMouse = 0;
 	
@@ -169,13 +173,28 @@ public class GeneTreesPanel extends JPanel {
 		Collections.sort(simulatedTrees); // sort from worst adapted to best adapted
 		Collections.reverse(simulatedTrees); // reverse list - it is now from best to worst
 		
+		if (simulatedTrees.get(0).getFitness() > maxFitness)
+			maxFitness = simulatedTrees.get(0).getFitness();
+		if (simulatedTrees.get(simulatedTrees.size() - 1).getFitness() < minFitness)
+			minFitness = simulatedTrees.get(simulatedTrees.size() - 1).getFitness();
+		
+		GeneTrees.gPanel.addPoint(0, generation, simulatedTrees.get(0).getFitness());
+		GeneTrees.gPanel.addPoint(2, generation, simulatedTrees.get(simulatedTrees.size() - 1).getFitness());
+		
+		avgFitness = 0;
 		int numTrees = simulatedTrees.size();
 		for (int i = 0; i < numTrees/2; i++) {
+			avgFitness += simulatedTrees.get(i).getFitness();
 			simulatedTrees.get(i).resetFitness(); // reset this tree's fitness
 			
 			// replace one of the lesser half of trees with a mutated copy of one of the better half of trees
 			simulatedTrees.set(numTrees/2 + i, new GeneTree(simulatedTrees.get(i)));
 		}
+		avgFitness /= numTrees;
+		GeneTrees.gPanel.addPoint(1, generation, avgFitness);
+		GeneTrees.gPanel.setXBounds(-1, generation);
+		GeneTrees.gPanel.setYBounds(minFitness, maxFitness);
+		GeneTrees.gPanel.repaint();
 		
 		// copy all trees to unsimulated
 		unsimulatedTrees.addAll(simulatedTrees);

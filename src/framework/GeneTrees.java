@@ -22,6 +22,7 @@
  * 
  */
 package framework;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -29,10 +30,13 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import grapher.GraphPanel;
+
 public class GeneTrees implements Runnable {
 	public static final String ver = "0.5.1";
 	public static JFrame frame;
 	public static GeneTreesPanel panel;
+	public static GraphPanel gPanel;
 	public static boolean debug = false;
 	
 	public static boolean ticking = true;
@@ -67,6 +71,15 @@ public class GeneTrees implements Runnable {
 		frame.setSize(800, 600);
 		frame.setUndecorated(false);
 		frame.setVisible(true);
+		
+		JFrame graphFrame = new JFrame("Fitness Stats");
+		gPanel = new GraphPanel();
+		gPanel.addDataset(0, "Max Fitness", Color.RED);
+		gPanel.addDataset(1, "Avg Fitness", Color.GREEN);
+		gPanel.addDataset(2, "Min Fitness", Color.BLUE);
+		graphFrame.add(gPanel);
+		graphFrame.setVisible(true);
+		graphFrame.setSize(800, 600);
 		
 		panel = new GeneTreesPanel(800, 600, numThreads);
 		frame.add(panel);

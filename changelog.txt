@@ -76,3 +76,6 @@ GeneTrees
 --Each thread goes through its pile of trees, then ends
 --The main thread join() each of the Simulation threads (no more busy waiting)
 -Substantial performance improvement
+
+0.6.0 - 11/7/17
+-Added the GraphPanel module from UrfUtils
