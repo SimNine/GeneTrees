@@ -74,6 +74,12 @@ public class GeneTreesPanel extends JPanel {
 				case KeyEvent.VK_D:
 					GeneTrees.debug = !GeneTrees.debug;
 					break;
+				case KeyEvent.VK_F1:
+					Loader.saveGame();
+					break;
+				case KeyEvent.VK_F2:
+					Loader.loadGame();
+					break;
 				}
 			}
 			public void keyReleased(KeyEvent e) {}
@@ -97,6 +103,19 @@ public class GeneTreesPanel extends JPanel {
 		
 		sysTime = System.currentTimeMillis();
 		time.start();
+	}
+	
+	/*
+	 * resets the simulation.
+	 * used when loading a generation from file
+	 */
+	public void reset(ArrayList<GeneTree> trees, int gen) {
+		tickNum = 0;
+		treeIndex = 0;
+		this.trees = trees;
+		this.generation = gen;
+		sysTime = System.currentTimeMillis();
+		sun.clear();
 	}
 	
 	private void finishNumGens(int num) {
@@ -234,5 +253,21 @@ public class GeneTreesPanel extends JPanel {
 	
 	public int getCurrGen() {
 		return this.generation;
+	}
+	
+	public void stopTime() {
+		time.stop();
+	}
+	
+	public void startTime() {
+		time.start();
+	}
+	
+	public ArrayList<GeneTree> getTrees() {
+		return trees;
+	}
+	
+	public GeneTree getTreeIndex(int i) {
+		return trees.get(i);
 	}
 }

@@ -1,6 +1,7 @@
 package simulation;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import framework.GeneTrees;
@@ -21,6 +22,15 @@ public class GeneTree implements Comparable<GeneTree> {
 		
 		age = 0;
 		origin = 0;
+	}
+	
+	// creates a new, blank genetree with a newly-assembled node structure rooted at the given node
+	// for I/O purposes
+	public GeneTree(TreeNode n) {
+		root = n;
+		root.initLocation();
+		
+		nodes = root.getNodes();
 	}
 	
 	// create a new genetree as a child of the given one
@@ -178,11 +188,23 @@ public class GeneTree implements Comparable<GeneTree> {
 		return nodes.size();
 	}
 	
+	public ArrayList<TreeNode> getAllNodes() {
+		return new ArrayList<TreeNode>(nodes);
+	}
+	
 	public int getAge() {
 		return age;
 	}
 	
 	public int getOrigin() {
 		return origin;
+	}
+	
+	public void setAge(int a) {
+		this.age = a;
+	}
+	
+	public void setOrigin(int o) {
+		this.origin = o;
 	}
 }

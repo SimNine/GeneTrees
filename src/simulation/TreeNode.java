@@ -24,6 +24,9 @@ public class TreeNode {
 	private TreeNode parent;
 	private HashSet<TreeNode> children = new HashSet<TreeNode>();
 	
+	// creates a blank TreeNode (for I/O purposes)
+	public TreeNode() {}
+	
 	// deeply, recursively clones a TreeNode
 	public TreeNode(TreeNode tgt, TreeNode parent, GeneTree owner) {
 		this.size = tgt.getSize();
@@ -54,7 +57,7 @@ public class TreeNode {
 		
 		// if this happens to become a structure node, there is a %50 chance of getting a child node
 		if (type == 0 && Math.random() < 0.5) {
-			this.addChild();
+			this.addNewChild();
 		}
 	}
 	
@@ -70,7 +73,7 @@ public class TreeNode {
 			case 0: // change to structure
 				this.type = 0;
 				if (Math.random() < 0.5) { // there is a 50% chance of gaining a child if this node changes to structure
-					this.addChild();
+					this.addNewChild();
 				}
 				break;
 			case 1: // change to leaf
@@ -116,7 +119,7 @@ public class TreeNode {
 		
 		// if this is a structure node, there is a 8% chance of adding a child node
 		if (this.type == 0 && Math.random() < 0.08) {
-			this.addChild();
+			this.addNewChild();
 		}
 		
 		if (Math.random() < 0.10) { // 10% chance to mutate angle
@@ -254,11 +257,35 @@ public class TreeNode {
 		return yPos;
 	}
 	
-	public void addChild() {
+	public void addNewChild() {
 		children.add(new TreeNode(owner, this));
+	}
+	
+	public void addChild(TreeNode node) {
+		children.add(node);
 	}
 	
 	public void setParent(TreeNode p) {
 		this.parent = p;
+	}
+	
+	public void setType(int t) {
+		this.type = t;
+	}
+	
+	public void setSize(int i) {
+		this.size = i;
+	}
+	
+	public void setAngle(int a) {
+		this.angle = a;
+	}
+	
+	public void setDistance(double d) {
+		this.dist = d;
+	}
+	
+	public void setOwner(GeneTree t) {
+		this.owner = t;
 	}
 }

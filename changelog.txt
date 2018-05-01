@@ -39,3 +39,6 @@ GeneTrees
 -Root nodes generate fitness proportional to their size
 -SunSpecks are tripled in power so that leaves are competitive
 -Fitness is now represented by a long instead of an int
+
+0.3.0 - 3/24/17
+-Added load/save (F1 to save, F2 to load)
