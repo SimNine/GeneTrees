@@ -101,7 +101,7 @@ public class GeneTreesPanel extends JPanel {
 	
 	public void init() {
 		// populate the list of trees
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 10000; i++) {
 			trees.add(new GeneTree());
 		}
 		
@@ -125,7 +125,7 @@ public class GeneTreesPanel extends JPanel {
 	private void continuousGenAndSave() {
 		time.stop();
 		
-		int saveDelay = 10; // interval of generations by which to save
+		int saveDelay = 2; // interval of generations by which to save
         String fileName = JOptionPane.showInputDialog(this, "name this generation stream", null);
 		
 		System.out.println("computing generations, saving every " + saveDelay + " gens");
@@ -143,12 +143,12 @@ public class GeneTreesPanel extends JPanel {
 	
 	private void finishNumGens(int num) {
 		time.stop();
-		System.out.println("computing " + num + " generations...");
+		System.out.println("computing " + num + " generations");
 		int currGen = generation;
 		while (generation < currGen + num) {
 			tick();
 		}
-		System.out.println("...done computing " + num + " generations");
+		System.out.println("done computing " + num + " generations");
 		time.start();
 	}
 	
@@ -156,18 +156,19 @@ public class GeneTreesPanel extends JPanel {
 		long newTime = System.currentTimeMillis();
 		long timeDiff = (newTime - sysTime)/1000;
 		sysTime = newTime;
-		System.out.println("generation " + generation + " finished, simulated in " + timeDiff + " seconds");
+		System.out.println("done simulating gen " + generation + " in " + timeDiff + " seconds");
 		
 		generation++;
 		
 		Collections.sort(trees); // sort from worst adapted to best adapted
 		Collections.reverse(trees); // reverse list - it is now from best to worst
 		
-		for (int i = 0; i < 500; i++) {
+		int numTrees = trees.size();
+		for (int i = 0; i < numTrees/2; i++) {
 			trees.get(i).resetFitness(); // reset this tree's fitness
 			
-			// replace one of the lesser 500 trees with a mutated copy of one of the better 500 trees
-			trees.set(500 + i, new GeneTree(trees.get(i)));
+			// replace one of the lesser half of trees with a mutated copy of one of the better half of trees
+			trees.set(numTrees/2 + i, new GeneTree(trees.get(i)));
 		}
 		
 		// not significant
@@ -196,8 +197,12 @@ public class GeneTreesPanel extends JPanel {
 		sun.clear();
 		treeIndex++;
 		
-		if (treeIndex == 1000) {
+		if (treeIndex == trees.size()) {
 			nextGen();
+		}
+		
+		if (treeIndex % (trees.size()/4) == 0) {
+			System.out.print(25*(treeIndex / (trees.size()/4)) + "%...");
 		}
 	}
 	
@@ -250,27 +255,30 @@ public class GeneTreesPanel extends JPanel {
 		}
 		
 		int fh = 15; // fontHeight
+		int ln = 1; // lineNum
 		g.setColor(Color.WHITE);
-		g.drawString("Tick: " + tickNum + " of " + maxTick, 0, fh);
-		g.drawString("Tick Speed: " + tickSpeed, 0, fh*2);
-		g.drawString("Pause simulation: P", 0, fh*3);
-		
-		g.drawString("Individual number: " + (treeIndex+1), 0, fh*5);
-		g.drawString("This individual's fitness: " + trees.get(treeIndex).getFitness(), 0, fh*6);
-		g.drawString("Number of this individual's nodes: " + trees.get(treeIndex).getNumNodes(), 0, fh*7);
-		g.drawString("This individual created in generation #: " + trees.get(treeIndex).getOrigin(), 0, fh*8);
-		g.drawString("This individual's mutational displacement from gen0: " + trees.get(treeIndex).getAge(), 0, fh*9);
-		g.drawString("Skip this individual: I", 0, fh*10);
-		
-		g.drawString("Generation number: " + generation, 0, fh*12);
-		g.drawString("Skip this generation: O", 0, fh*13);
-		g.drawString("Skip ten generations: B", 0, fh*14);
-		g.drawString("Skip fifty generations: N", 0, fh*15);
-		g.drawString("Skip one hundred generations: M", 0, fh*16);
-
-		g.drawString("Save current generation: F1", 0, fh*18);
-		g.drawString("Load a saved generation: F2", 0, fh*19);
-		g.drawString("Run continuously, saving every 10 generations: R", 0, fh*20);
+		g.drawString("Tick: " + tickNum + " of " + maxTick, 0, fh*ln++);
+		g.drawString("Tick Speed: " + tickSpeed, 0, fh*ln++);
+		g.drawString("Pause simulation: P", 0, fh*ln++);
+		ln++;
+		g.drawString("Individual number: " + (treeIndex+1), 0, fh*ln++);
+		g.drawString("This individual's sunlight: " + trees.get(treeIndex).getSunlight(), 0, fh*ln++);
+		g.drawString("This individual's nutrients: " + trees.get(treeIndex).getNutrients(), 0, fh*ln++);
+		g.drawString("This individual's fitness: " + trees.get(treeIndex).getFitness(), 0, fh*ln++);
+		g.drawString("Number of this individual's nodes: " + trees.get(treeIndex).getNumNodes(), 0, fh*ln++);
+		g.drawString("This individual created in generation #: " + trees.get(treeIndex).getOrigin(), 0, fh*ln++);
+		g.drawString("This individual's mutational displacement from gen0: " + trees.get(treeIndex).getAge(), 0, fh*ln++);
+		g.drawString("Skip this individual: I", 0, fh*ln++);
+		ln++;
+		g.drawString("Generation number: " + generation, 0, fh*ln++);
+		g.drawString("Skip this generation: O", 0, fh*ln++);
+		g.drawString("Skip ten generations: B", 0, fh*ln++);
+		g.drawString("Skip fifty generations: N", 0, fh*ln++);
+		g.drawString("Skip one hundred generations: M", 0, fh*ln++);
+		ln++;
+		g.drawString("Save current generation: F1", 0, fh*ln++);
+		g.drawString("Load a saved generation: F2", 0, fh*ln++);
+		g.drawString("Run continuously, saving every 10 generations: R", 0, fh*ln++);
 	}
 	
 	public int getGroundLevel() {

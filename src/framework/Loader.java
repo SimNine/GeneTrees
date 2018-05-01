@@ -48,7 +48,7 @@ public class Loader {
         
         // begin saving process
         try {
-            System.out.print("saving current generation...");
+            System.out.print("saving " + filename + "...");
             save.createNewFile();
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(save));
             

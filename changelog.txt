@@ -47,3 +47,13 @@ GeneTrees
 -Added continuous generation with regular saving
 -Added more instruction strings
 -A few other small bugfixes
+
+0.4.0 - 3/29/17
+-Roots now gather nutrients, leaves now gather sunlight
+-Fitness is created using a 1:1 ratio of nutrients and sunlight
+-This requires trees to have both leaves and roots
+-A structure node may now have no more than 4 root children
+-Structure nodes now have a 25% chance of adding a child on mutation,
+	and a decreasing chance of adding even more children
+-Nodes now passively consume half of the fitness they did previously
+-The top tree in each generation is now rendered on completion of each generation

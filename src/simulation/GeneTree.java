@@ -8,6 +8,9 @@ import framework.GeneTrees;
 
 public class GeneTree implements Comparable<GeneTree> {
 	private long fitness = 0;
+	private long nutrients = 0;
+	private long sunlight = 0;
+	
 	private TreeNode root;
 	private HashSet<TreeNode> nodes;
 	private int age; // the number of mutations this tree is from generation 0
@@ -127,7 +130,7 @@ public class GeneTree implements Comparable<GeneTree> {
 					
 					// if this node is a leaf, increment its fitness
 					if (n.getType() == 1) {
-						fitness += ss.getPower();
+						sunlight += ss.getPower();
 					}
 				}
 			}
@@ -135,12 +138,18 @@ public class GeneTree implements Comparable<GeneTree> {
 			
 			// if this is a root node, gradually increment its fitness
 			if (n.getType() == 2 && n.getYPos() > GeneTrees.panel.getGroundLevel()) {
-				fitness += 2*n.getSize();
+				nutrients += 2*n.getSize();
 			}
 			
 			// decrement fitness proportional to the size of this node
-			fitness -= n.getSize();
+			fitness -= n.getSize()/2;
 		}
+		
+		// calculate how much fitness has been gained this tick
+		long newFitness = Math.min(sunlight, nutrients);
+		sunlight -= newFitness;
+		nutrients -= newFitness;
+		fitness += newFitness;
 	}
 	
 	/*
@@ -177,6 +186,8 @@ public class GeneTree implements Comparable<GeneTree> {
 	}
 	
 	public void resetFitness() {
+		sunlight = 0;
+		nutrients = 0;
 		fitness = 0;
 	}
 	
@@ -206,5 +217,13 @@ public class GeneTree implements Comparable<GeneTree> {
 	
 	public void setOrigin(int o) {
 		this.origin = o;
+	}
+	
+	public long getNutrients() {
+		return nutrients;
+	}
+	
+	public long getSunlight() {
+		return sunlight;
 	}
 }

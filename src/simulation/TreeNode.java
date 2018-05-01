@@ -53,10 +53,14 @@ public class TreeNode {
 		// if this is the root node, it must be a structure node
 		if (parent == null) {
 			this.type = 0;
+		} else if (parent.getNumRootChildren() >= 4) {
+			// if this node's parent already has more than 4 root nodes, this cannot be a root node
+			this.type = (int)(Math.random()*2);
 		}
 		
-		// if this happens to become a structure node, there is a %50 chance of getting a child node
-		if (type == 0 && Math.random() < 0.5) {
+		// if this happens to become a structure node, there is a %40 chance of getting a child node
+		// and a decreasing chance of more
+		while (type == 0 && Math.random() < 0.40) {
 			this.addNewChild();
 		}
 	}
@@ -72,7 +76,9 @@ public class TreeNode {
 			switch (newType) {
 			case 0: // change to structure
 				this.type = 0;
-				if (Math.random() < 0.5) { // there is a 50% chance of gaining a child if this node changes to structure
+				// there is a 40% chance of gaining a child if this node changes to structure
+				// and a decreasing chance of more children
+				while (Math.random() < 0.40) { 
 					this.addNewChild();
 				}
 				break;
@@ -117,8 +123,9 @@ public class TreeNode {
 		}
 		children.removeAll(toDelete);
 		
-		// if this is a structure node, there is a 8% chance of adding a child node
-		if (this.type == 0 && Math.random() < 0.08) {
+		// if this is a structure node, there is a 10% chance of adding a child node
+		// and a decreasing chance of several child nodes
+		while (this.type == 0 && Math.random() < 0.10) {
 			this.addNewChild();
 		}
 		
@@ -287,5 +294,15 @@ public class TreeNode {
 	
 	public void setOwner(GeneTree t) {
 		this.owner = t;
+	}
+	
+	public int getNumRootChildren() {
+		int ret = 0;
+		for (TreeNode n : children) {
+			if (n.getType() == 2) {
+				ret++;
+			}
+		}
+		return ret;
 	}
 }
