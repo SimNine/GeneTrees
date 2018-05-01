@@ -23,7 +23,7 @@ hs_err_pid*
 
 # local directories and eclipse files
 bin/
-compiles/
+archive/
 .classpath
 .project
 .settings/

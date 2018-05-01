@@ -1,0 +1,1 @@
+java -jar -Xmx1024M 0.6.0.jar 4

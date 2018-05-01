@@ -1,0 +1,81 @@
+GeneTrees
+----------
+
+0.0.0 - Unknown (sometime around 5/xx/2016)
+-Not much to see here
+-Basics of java swing set up
+
+0.1.0 - 3/23/17
+-Redone pretty much everything
+-Environment:
+--TreeNode
+---A node, (potentially) with children
+---One of several different types: leaf, structure, root, watercatcher
+---Contains "genes"
+--GeneTree
+---A wrapper for a tree of TreeNodes
+---Contains cached data to compute evolution faster
+---Contains paint methods and collision checking methods
+--SunSpeck
+---Essentially just a wrapper for a triplet of values
+---xPos, yPos, and "fitness" which is essentially the value of the speck
+---Greater fitness in a speck -> greater fitness when absorbed
+-Controls:
+--Some fairly lame keyboard controls, no real interface yet
+--Keys are mapped to skip various lengths of time (i.e., number of ticks)
+--Rendering is disabled while skipping in order to compute efficiently as possible
+-Fitness calculations:
+--SunSpecks spawn at top of screen with 10,000 fitness, losing 20 fitness each tick as they descend
+--Leaf nodes generate no fitness unless they collide with a sunspeck, then absorbing its fitness
+--Each node costs 1 fitness per tick
+--Root nodes generate 2 fitness per tick when underground
+
+0.2.0 - 3/23/17
+-Pressing "D" now toggles debug mode
+--Displays fitness level of sunspecks
+--Displays bounding boxes of nodes
+-Eliminated printing to console the time to mutate (it was insignificant)
+-Nodes now cost fitness per tick proportional to their size
+-Root nodes generate fitness proportional to their size
+-SunSpecks are tripled in power so that leaves are competitive
+-Fitness is now represented by a long instead of an int
+
+0.3.0 - 3/24/17
+-Added load/save (F1 to save, F2 to load)
+
+0.3.1 - 3/24/17
+-Added continuous generation with regular saving
+-Added more instruction strings
+-A few other small bugfixes
+
+0.4.0 - 3/29/17
+-Roots now gather nutrients, leaves now gather sunlight
+-Fitness is created using a 1:1 ratio of nutrients and sunlight
+-This requires trees to have both leaves and roots
+-A structure node may now have no more than 4 root children
+-Structure nodes now have a 25% chance of adding a child on mutation,
+	and a decreasing chance of adding even more children
+-Nodes now passively consume half of the fitness they did previously
+-The top tree in each generation is now rendered on completion of each generation
+
+0.5.0 - 3/30/17
+-Separated the simulation environment into its own class, Simulation
+-the "Simulation" class doubles as a Thread extension and just a container
+-Simulation can be ticked manually as if not its own thread, or it can
+	be run as its own thread, causing it to run through its maximum
+	number of ticks automatically.
+-Added multithreading support.
+--Best configuration on Dell XPS 15Z is 6 threads, 5ms pause between thread checks
+-Added command line args
+--First argument is the number of threads to use
+--Second argument is time between thread checks, in ms
+
+0.5.1 - 9/16/17
+-Revamped the threading system, now that I understand how threads work
+--The main thread now divides up the remaining unsimulated trees into piles, one pile for each Simulation thread
+--Each thread goes through its pile of trees, then ends
+--The main thread join() each of the Simulation threads (no more busy waiting)
+-Substantial performance improvement
+
+0.6.0 - 11/7/17
+-Added the GraphPanel module from UrfUtils
