@@ -18,7 +18,7 @@ public class Loader {
 	private static File saveDir = new File("savedgames");
 	
 	public static void saveGame() {
-		GeneTrees.panel.stopTime();
+		GeneTrees.time.stop();
 		
         if (!saveDir.exists()) saveDir.mkdir();
         
@@ -28,13 +28,13 @@ public class Loader {
 	}
 
 	public static void saveGame(String saveName) {
-		GeneTrees.panel.stopTime();
+		GeneTrees.time.stop();
 		
         if (!saveDir.exists()) saveDir.mkdir();
         
         String filename = saveName + ".gt";
         if (filename.equals("null.gt")) {
-        	GeneTrees.panel.startTime();
+        	GeneTrees.time.start();
         	return;
         }
         
@@ -121,15 +121,15 @@ public class Loader {
             System.exit(1);
         }
         
-        GeneTrees.panel.startTime();
+        GeneTrees.time.start();
     }
     
     public static void loadGame() {
-    	GeneTrees.panel.stopTime();
+    	GeneTrees.time.stop();
     	
         String filename = JOptionPane.showInputDialog(null, "load a generation", null) + ".gt";
         if (filename.equals("null.gt")) {
-        	GeneTrees.panel.startTime();
+        	GeneTrees.time.start();
         	return;
         }
         
@@ -255,6 +255,6 @@ public class Loader {
             System.exit(1);
         }
         
-        GeneTrees.panel.startTime();
+        GeneTrees.time.start();
     }
 }

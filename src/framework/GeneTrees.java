@@ -22,17 +22,41 @@
  * 
  */
 package framework;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 public class GeneTrees implements Runnable {
-	public static final String ver = "0.4.0";
+	public static final String ver = "0.5.0";
 	public static JFrame frame;
 	public static GeneTreesPanel panel;
 	public static boolean debug = false;
+	
+	public static boolean ticking = true;
+	public static int tickSpeed = 2;
+	
+	private static int numThreads;
+	private static int threadCheckDelay;
+	
+	public static Timer time = new Timer(tickSpeed, new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+        	if (ticking) {
+        		panel.tick();
+        	}
+            panel.repaint();
+        }
+	});
 
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new GeneTrees());
+		
+		numThreads = Integer.parseInt(args[0]);
+		threadCheckDelay = Integer.parseInt(args[1]);
+		
+		System.out.println("starting GeneTrees v" + ver + " with " + numThreads + " threads and " + threadCheckDelay + "ms thread checking delay");
 	}
 
 	@Override
@@ -46,8 +70,9 @@ public class GeneTrees implements Runnable {
 		frame.setUndecorated(false);
 		frame.setVisible(true);
 		
-		panel = new GeneTreesPanel(800, 600);
+		panel = new GeneTreesPanel(800, 600, numThreads, threadCheckDelay);
 		frame.add(panel);
 		panel.init();
+		time.start();
 	}
 }

@@ -1,51 +1,40 @@
 package framework;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.Timer;
 
 import simulation.GeneTree;
-import simulation.SunSpeck;
+import simulation.Simulation;
 
 @SuppressWarnings("serial")
 public class GeneTreesPanel extends JPanel {
 	private ArrayList<GeneTree> trees = new ArrayList<GeneTree>();
-	private HashSet<SunSpeck> sun = new HashSet<SunSpeck>();
-	private int groundLevel = 400;
-	
-	private int tickSpeed = 2;
-	private int tickNum = 0;
-	private int maxTick = 10000;
-	private int treeIndex = 0;
+	private ArrayDeque<Integer> notDoneTrees = new ArrayDeque<Integer>();
+	private HashSet<Integer> doneTrees = new HashSet<Integer>();
 	private int generation = 0;
-	
-	private boolean ticking = true;
 	
 	public int xMouse = 0;
 	public int yMouse = 0;
 	
-	private Timer time = new Timer(tickSpeed, new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-        	if (ticking) {
-        		tick();
-        	}
-            repaint();
-        }
-	});
 	private long sysTime;
 	
-	public GeneTreesPanel(int width, int height) {
+	private Simulation currSim;
+	private ArrayList<Simulation> sims = new ArrayList<Simulation>();
+	private final int maxSimulations;
+	private final int simCheckingDelay;
+	private boolean isMultithreading = false;
+	
+	public GeneTreesPanel(int width, int height, int maxThreads, int threadCheckDelay) {
 		super();
 		setFocusable(true);
 		requestFocusInWindow();
@@ -55,10 +44,10 @@ public class GeneTreesPanel extends JPanel {
 			public void keyPressed(KeyEvent e) {
 				switch (e.getKeyCode()) {
 				case KeyEvent.VK_P:
-					ticking = !ticking;
+					GeneTrees.ticking = !GeneTrees.ticking;
 					break;
 				case KeyEvent.VK_O:
-					finishGen();
+					finishNumGens(1);
 					break;
 				case KeyEvent.VK_I:
 					finishInd();
@@ -97,16 +86,25 @@ public class GeneTreesPanel extends JPanel {
 				yMouse = e.getY();
 			}
 		});
+		
+		this.maxSimulations = maxThreads;
+		this.simCheckingDelay = threadCheckDelay;
 	}
 	
 	public void init() {
-		// populate the list of trees
+		sysTime = System.currentTimeMillis();
+		
+		// populate the list of trees and the list of trees not yet simulated
 		for (int i = 0; i < 10000; i++) {
 			trees.add(new GeneTree());
+			notDoneTrees.add(i);
 		}
 		
-		sysTime = System.currentTimeMillis();
-		time.start();
+		// get one of the trees not yet simulated
+		int treeIndex = notDoneTrees.pop();
+		currSim = new Simulation(trees.get(treeIndex), treeIndex, this.getWidth(), this.getHeight());
+		
+		GeneTrees.time.start();
 	}
 	
 	/*
@@ -114,26 +112,33 @@ public class GeneTreesPanel extends JPanel {
 	 * used when loading a generation from file
 	 */
 	public void reset(ArrayList<GeneTree> trees, int gen) {
-		tickNum = 0;
-		treeIndex = 0;
 		this.trees = trees;
 		this.generation = gen;
 		sysTime = System.currentTimeMillis();
-		sun.clear();
+		isMultithreading = false;
+		
+		notDoneTrees.clear();
+		for (int i = 0; i < trees.size(); i++) {
+			notDoneTrees.add(i);
+		}
+		doneTrees.clear();
+		
+		int treeIndex = notDoneTrees.pop();
+		currSim = new Simulation(trees.get(treeIndex), treeIndex, this.getWidth(), this.getHeight());
 	}
 	
 	private void continuousGenAndSave() {
-		time.stop();
+		GeneTrees.time.stop();
+		beginMultithreading();
 		
 		int saveDelay = 2; // interval of generations by which to save
         String fileName = JOptionPane.showInputDialog(this, "name this generation stream", null);
-		
 		System.out.println("computing generations, saving every " + saveDelay + " gens");
+		
 		while (true) {
 			// the first tick of each marked generation, save the generation
 			if (generation % saveDelay == 0 &&
-				treeIndex == 0 &&
-				tickNum == 0) {
+				doneTrees.isEmpty()) {
 				Loader.saveGame(fileName + "_gen" + generation);
 			}
 			
@@ -142,14 +147,49 @@ public class GeneTreesPanel extends JPanel {
 	}
 	
 	private void finishNumGens(int num) {
-		time.stop();
+		GeneTrees.time.stop();
 		System.out.println("computing " + num + " generations");
+		beginMultithreading();
+		
 		int currGen = generation;
 		while (generation < currGen + num) {
 			tick();
+			
+			// pause between ticks
+			try {
+				Thread.sleep(simCheckingDelay);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
+		
+		endMultithreading();
 		System.out.println("done computing " + num + " generations");
-		time.start();
+		GeneTrees.time.start();
+	}
+	
+	// finishes this individual's simulation
+	private void finishInd() {
+		GeneTrees.time.stop();
+		
+		// if the current simulation isn't done
+		while (!currSim.isDone()) {
+			tick();
+		}
+		
+		// check if all trees are done simulating; if so, new gen
+		boolean allDone = true;
+		for (GeneTree t : trees) {
+			if (!t.isDone()) {
+				allDone = false;
+				break;
+			}
+		}
+		if (allDone) {
+			nextGen();
+		}
+		
+		GeneTrees.time.start();
 	}
 	
 	private void nextGen() {
@@ -171,103 +211,96 @@ public class GeneTreesPanel extends JPanel {
 			trees.set(numTrees/2 + i, new GeneTree(trees.get(i)));
 		}
 		
-		// not significant
-//		newTime = System.currentTimeMillis();
-//		timeDiff = (newTime - sysTime)/1000;
-//		sysTime = newTime;
-//		System.out.println("children mutated in " + timeDiff + " seconds");
-		
-		treeIndex = 0;
+		// reset the lists of done and not done trees
+		for (int i = 0; i < numTrees; i++) {
+			notDoneTrees.add(i);
+		}
+		doneTrees.clear();
 	}
 	
-	private void finishGen() {
-		time.stop();
-		
-		int currGen = generation;
-		while (currGen == generation) {
-			tick();
-		}
-		
-		time.start();
+	// begins multithreading configuration
+	private void beginMultithreading() {
+		isMultithreading = true;
+		currSim.getTree().resetFitness();
+		notDoneTrees.add(currSim.getTreeIndex());
 	}
 	
-	// resets the sandbox for the next individual
-	private void nextInd() {
-		tickNum = 0;
-		sun.clear();
-		treeIndex++;
-		
-		if (treeIndex == trees.size()) {
-			nextGen();
-		}
-		
-		if (treeIndex % (trees.size()/4) == 0) {
-			System.out.print(25*(treeIndex / (trees.size()/4)) + "%...");
-		}
+	// ends multithreading configuration
+	private void endMultithreading() {
+		isMultithreading = false;
+		int treeIndex = notDoneTrees.pop();
+		currSim = new Simulation(trees.get(treeIndex), treeIndex, this.getWidth(), this.getHeight());
 	}
 	
-	// finishes this individual's simulation
-	private void finishInd() {
-		time.stop();
-		
-		int currTree = treeIndex;
-		while (currTree == treeIndex) {
-			tick();
-		}
-		
-		time.start();
-	}
-	
-	private void tick() {
-		tickNum++; // advance the tick number
-		
-		// check for this being the last tick for this individual
-		if (tickNum == maxTick) {
-			nextInd();
-		}
-		
-		if (Math.random() < 0.10) { // 10% chance of adding a new sunspeck
-			sun.add(new SunSpeck((int)(Math.random()*this.getWidth()), 0));
-		}
-		
-		HashSet<SunSpeck> rem = new HashSet<SunSpeck>();
-		for (SunSpeck s : sun) { // for each sunspeck
-			s.tick(); // tick each sunspeck
-			if (s.getYPos() > groundLevel) { // check if sunspeck has hit ground
-				rem.add(s);
+	void tick() {
+		if (isMultithreading) {
+			// check if any sims are done
+			ArrayList<Simulation> simsToRemove = new ArrayList<Simulation>();
+			for (Simulation s : sims) { // for each sim
+				if (s.isDone()) { // if this sim is done
+					doneTrees.add(s.getTreeIndex());
+					simsToRemove.add(s);
+				}
+			}
+			sims.removeAll(simsToRemove);
+			
+			// if more simulations can be started
+			while (sims.size() < maxSimulations && !notDoneTrees.isEmpty()) {
+				int index = notDoneTrees.pop();
+				Simulation newSim = new Simulation(trees.get(index), index, this.getWidth(), this.getHeight());
+				newSim.start();
+				sims.add(newSim);
+			}
+			
+			// if all the trees are done
+			if (doneTrees.size() == trees.size()) {
+				nextGen();
+			}
+			
+			if (GeneTrees.debug) {
+				System.out.println("num trees done: " + doneTrees.size());
+			}
+		} else {
+			if (currSim.isDone()) {
+				// record this tree as being done
+				doneTrees.add(currSim.getTreeIndex());
+				
+				// if all trees are now done
+				if (doneTrees.size() == trees.size()) {
+					nextGen();
+				}
+				
+				// new simulation with the next tree
+				int treeIndex = notDoneTrees.pop();
+				currSim = new Simulation(trees.get(treeIndex), treeIndex, this.getWidth(), this.getHeight());
+			} else {
+				currSim.tick();
 			}
 		}
-		sun.removeAll(rem); // remove all specks that have hit the ground
-		
-		trees.get(treeIndex).tick(sun); // tick the tree
 	}
 
 	public void paintComponent(Graphics g) {
-		g.setColor(new Color(146, 184, 244));
-		g.fillRect(0, 0, this.getWidth(), this.getHeight());
-		g.setColor(new Color(183, 85, 23));
-		g.fillRect(0, groundLevel, this.getWidth(), this.getHeight()-groundLevel);
-		
-		trees.get(treeIndex).draw(g);
-		
-		for (SunSpeck s : sun) {
-			s.draw(g);
+		if (isMultithreading) {
+			// this shouldn't be possible
+			throw new IllegalStateException("trying to paint while multithreading");
 		}
+		
+		currSim.draw(g);
 		
 		int fh = 15; // fontHeight
 		int ln = 1; // lineNum
 		g.setColor(Color.WHITE);
-		g.drawString("Tick: " + tickNum + " of " + maxTick, 0, fh*ln++);
-		g.drawString("Tick Speed: " + tickSpeed, 0, fh*ln++);
+		g.drawString("Tick: " + currSim.getCurrTick() + " of " + currSim.getMaxTick(), 0, fh*ln++);
+		g.drawString("Tick Speed: " + GeneTrees.tickSpeed, 0, fh*ln++);
 		g.drawString("Pause simulation: P", 0, fh*ln++);
 		ln++;
-		g.drawString("Individual number: " + (treeIndex+1), 0, fh*ln++);
-		g.drawString("This individual's sunlight: " + trees.get(treeIndex).getSunlight(), 0, fh*ln++);
-		g.drawString("This individual's nutrients: " + trees.get(treeIndex).getNutrients(), 0, fh*ln++);
-		g.drawString("This individual's fitness: " + trees.get(treeIndex).getFitness(), 0, fh*ln++);
-		g.drawString("Number of this individual's nodes: " + trees.get(treeIndex).getNumNodes(), 0, fh*ln++);
-		g.drawString("This individual created in generation #: " + trees.get(treeIndex).getOrigin(), 0, fh*ln++);
-		g.drawString("This individual's mutational displacement from gen0: " + trees.get(treeIndex).getAge(), 0, fh*ln++);
+		g.drawString("Individual number: " + currSim.getTreeIndex() + " of " + trees.size(), 0, fh*ln++);
+		g.drawString("This individual's sunlight: " + currSim.getTree().getSunlight(), 0, fh*ln++);
+		g.drawString("This individual's nutrients: " + currSim.getTree().getNutrients(), 0, fh*ln++);
+		g.drawString("This individual's fitness: " + currSim.getTree().getFitness(), 0, fh*ln++);
+		g.drawString("Number of this individual's nodes: " + currSim.getTree().getNumNodes(), 0, fh*ln++);
+		g.drawString("This individual created in generation #: " + currSim.getTree().getOrigin(), 0, fh*ln++);
+		g.drawString("This individual's mutational displacement from gen0: " + currSim.getTree().getAge(), 0, fh*ln++);
 		g.drawString("Skip this individual: I", 0, fh*ln++);
 		ln++;
 		g.drawString("Generation number: " + generation, 0, fh*ln++);
@@ -281,20 +314,8 @@ public class GeneTreesPanel extends JPanel {
 		g.drawString("Run continuously, saving every 10 generations: R", 0, fh*ln++);
 	}
 	
-	public int getGroundLevel() {
-		return groundLevel;
-	}
-	
 	public int getCurrGen() {
 		return this.generation;
-	}
-	
-	public void stopTime() {
-		time.stop();
-	}
-	
-	public void startTime() {
-		time.start();
 	}
 	
 	public ArrayList<GeneTree> getTrees() {

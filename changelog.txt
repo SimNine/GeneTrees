@@ -57,3 +57,15 @@ GeneTrees
 	and a decreasing chance of adding even more children
 -Nodes now passively consume half of the fitness they did previously
 -The top tree in each generation is now rendered on completion of each generation
+
+0.5.0 - 3/30/17
+-Separated the simulation environment into its own class, Simulation
+-the "Simulation" class doubles as a Thread extension and just a container
+-Simulation can be ticked manually as if not its own thread, or it can
+	be run as its own thread, causing it to run through its maximum
+	number of ticks automatically.
+-Added multithreading support.
+--Best configuration on Dell XPS 15Z is 6 threads, 5ms pause between thread checks
+-Added command line args
+--First argument is the number of threads to use
+--Second argument is time between thread checks, in ms

@@ -150,7 +150,7 @@ public class TreeNode {
 		// if this node is the root node
 		if (this.parent == null) {
 			xPos = GeneTrees.panel.getWidth()/2; // PLACEHOLDER
-			yPos = GeneTrees.panel.getGroundLevel(); // PLACEHOLDER
+			yPos = Simulation.getGroundLevel(); // PLACEHOLDER
 			
 			// initialize the location of children
 			for (TreeNode n : children) {

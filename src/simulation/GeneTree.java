@@ -10,6 +10,7 @@ public class GeneTree implements Comparable<GeneTree> {
 	private long fitness = 0;
 	private long nutrients = 0;
 	private long sunlight = 0;
+	private boolean done = false;
 	
 	private TreeNode root;
 	private HashSet<TreeNode> nodes;
@@ -137,7 +138,7 @@ public class GeneTree implements Comparable<GeneTree> {
 			sun.removeAll(rem);
 			
 			// if this is a root node, gradually increment its fitness
-			if (n.getType() == 2 && n.getYPos() > GeneTrees.panel.getGroundLevel()) {
+			if (n.getType() == 2 && n.getYPos() > Simulation.getGroundLevel()) {
 				nutrients += 2*n.getSize();
 			}
 			
@@ -189,6 +190,7 @@ public class GeneTree implements Comparable<GeneTree> {
 		sunlight = 0;
 		nutrients = 0;
 		fitness = 0;
+		done = false;
 	}
 	
 	public void mutate() {
@@ -225,5 +227,13 @@ public class GeneTree implements Comparable<GeneTree> {
 	
 	public long getSunlight() {
 		return sunlight;
+	}
+	
+	public boolean isDone() {
+		return done;
+	}
+
+	public void setDone(boolean b) {
+		done = b;
 	}
 }
