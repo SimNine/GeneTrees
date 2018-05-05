@@ -22,6 +22,7 @@
  * 
  */
 package framework;
+
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -30,10 +31,10 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import grapher.GraphPanel;
+import urf.grapher.GraphPanel;
 
 public class GeneTrees implements Runnable {
-	public static final String ver = "0.5.1";
+	public static final String ver = "0.6.0";
 	public static JFrame frame;
 	public static GeneTreesPanel panel;
 	public static GraphPanel gPanel;
